@@ -4,4 +4,4 @@ project(VTS C)
 set(CMAKE_C_STANDARD 99)
 
 add_executable(VTS
-        main.c)
+        testat1.c)
