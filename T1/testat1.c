@@ -3,44 +3,9 @@
 #include <unistd.h>
 #include <sys/sem.h>
 
-void startSimulation(int process);
-
-int init_sem();
-
-void P(int sem_num);
-
-void V(int sem_num);
-
 int SEM_ID;
 
-int main() {
-    int NUMBER_OF_PROCESSES = 3;
-    // sem init
-    SEM_ID = init_sem();
-
-    for (int process = 0; process < NUMBER_OF_PROCESSES; process++) {
-        switch (fork()) {
-            case -1:
-                perror("FORK failed");
-                exit(1);
-            case 0:
-                /*child*/
-                printf("Child process %d (%d) started\n", process, getpid());
-                startSimulation(process);
-                exit(0);
-            default:
-                /*father*/
-                ;
-
-        }
-    }
-    sleep(15);
-    printf("Father process stopped\n");
-
-    return 0;
-}
-
-int init_sem() {
+int initSem() {
     int sem_key;
     int sem_id;
 
@@ -97,4 +62,31 @@ void startSimulation(int process) {
     printf("Process %d enters a non-critical Zone\n", process);
     sleep(1);
     printf("Process %d leaves the non-critical Zone\n", process);
+}
+
+int main() {
+    int NUMBER_OF_PROCESSES = 3;
+    // sem init
+    SEM_ID = initSem();
+
+    for (int process = 0; process < NUMBER_OF_PROCESSES; process++) {
+        switch (fork()) {
+            case -1:
+                perror("FORK failed");
+                exit(1);
+            case 0:
+                /*child*/
+                printf("Child process %d (%d) started\n", process, getpid());
+                startSimulation(process);
+                exit(0);
+            default:
+                /*father*/
+                ;
+
+        }
+    }
+    sleep(15);
+    printf("Father process stopped\n");
+
+    return 0;
 }

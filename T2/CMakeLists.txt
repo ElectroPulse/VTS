@@ -3,4 +3,8 @@ project(T2 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(T2 testat2.c)
+find_library(Semaphoren libSemaphoren.so)
+
+add_executable(T2 testat2_a1_with_libary.c)
+
+target_link_libraries(T2 ${Semaphoren})
