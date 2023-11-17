@@ -1,0 +1,31 @@
+1a)
+
+void P(forks[], count){
+    for (count){
+        semop(fork[index], -1);
+    }
+}
+
+void V(forks[], count){
+    for (count){
+        semop(fork[index], 1);
+    }
+
+}
+
+for(i=0;i<5;i++){
+    fork();
+
+    while(){
+        sleep(rand()) // Philosoph denkt zufällige Zeit
+
+        // Philosoph isst zufällige Zeit
+        P(i, i+1);
+        sleep(rand())
+        V(i, i+1);
+        // Philoloph ist fertig mit essen
+    }
+    exit()
+}
+
+2a)

@@ -34,43 +34,27 @@ int initSem(int semCount) {
     return semSetId;
 }
 
-void P(int semSetId, int firstSem, int secondSem) {
-    struct sembuf semaphore;
-    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
-    semaphore.sem_op = -1; // Block
-
-    //First Sem
-    semaphore.sem_num = firstSem;
-
-    if (semop(semSetId, &semaphore, 1)) { // 1 size of array
-        perror("Error in semop P()");
-        exit(1);
+void P(int semSetId, int forks[], int count) {
+    struct sembuf semaphore[count];
+    for (int i = 0; i < count; ++i) {
+        semaphore[i].sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
+        semaphore[i].sem_op = -1; // Block
+        semaphore[i].sem_num = forks[i];
     }
-
-    //Second Sem
-    semaphore.sem_num = secondSem;
-    if (semop(semSetId, &semaphore, 1)) { // 1 size of array
+    if (semop(semSetId, semaphore, count)) { // 1 size of array
         perror("Error in semop P()");
         exit(1);
     }
 }
 
-void V(int semSetId, int firstSem, int secondSem) {
-    struct sembuf semaphore;
-    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
-    semaphore.sem_op = 1; // Unblock
-
-    //First Sem
-    semaphore.sem_num = firstSem;
-
-    if (semop(semSetId, &semaphore, 1)) { // 1 size of array
-        perror("Error in semop P()");
-        exit(1);
+void V(int semSetId, int forks[], int count) {
+    struct sembuf semaphore[count];
+    for (int i = 0; i < count; ++i) {
+        semaphore[i].sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
+        semaphore[i].sem_op = 1; // Unblock
+        semaphore[i].sem_num = forks[i];
     }
-
-    //Second Sem
-    semaphore.sem_num = secondSem;
-    if (semop(semSetId, &semaphore, 1)) { // 1 size of array
+    if (semop(semSetId, semaphore, count)) { // 1 size of array
         perror("Error in semop P()");
         exit(1);
     }
@@ -105,14 +89,13 @@ int main() {
                 printf("Child process %d (%d) started\n", i, getpid());
                 srand(getpid());
                 for (int j = 0; j < 5; j++) {
-                    int firstFork = i;
-                    int secondFork = (i + 1) % 5;
+                    int forks[2] = {i, (i+1)%5};
                     // Thinking
-                    think(i, firstFork, secondFork);
+                    think(i, forks[0], forks[1]);
                     // Eating
-                    P(semSetId, firstFork, secondFork);
-                    eat(i, firstFork, secondFork);
-                    V(semSetId, firstFork, secondFork);
+                    P(semSetId, forks,  2);
+                    eat(i, forks[0], forks[1]);
+                    V(semSetId, forks,  2);
                 }
                 printf("Philosoph %d died\n", i);
                 exit(0);

@@ -8,6 +8,6 @@ find_library(Semaphoren libSemaphoren.so)
 add_executable(T1 testat1.c
         ../T2/testat2_a1.c
         ../T2/testat2_a1_with_libary.c
-        ../T2/testat2_a2.c)
+)
 
 target_link_libraries(T1 ${Semaphoren})
