@@ -41,6 +41,7 @@ int main() {
                     eat(i);
                     V(semSet, indices, 2);
                 }
+                printf("Philosoph %d died\n", i);
                 exit(0);
             default:
                 /*father*/

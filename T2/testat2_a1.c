@@ -35,13 +35,13 @@ int initSem(int semCount) {
 }
 
 void P(int semSetId, int firstSem, int secondSem) {
-    int semAction = -1;
     struct sembuf semaphore;
+    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
+    semaphore.sem_op = -1; // Block
 
     //First Sem
     semaphore.sem_num = firstSem;
-    semaphore.sem_op = semAction; // Block
-    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
+
     if (semop(semSetId, &semaphore, 1)) { // 1 size of array
         perror("Error in semop P()");
         exit(1);
@@ -49,8 +49,6 @@ void P(int semSetId, int firstSem, int secondSem) {
 
     //Second Sem
     semaphore.sem_num = secondSem;
-    semaphore.sem_op = semAction; // Block
-    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
     if (semop(semSetId, &semaphore, 1)) { // 1 size of array
         perror("Error in semop P()");
         exit(1);
@@ -58,13 +56,13 @@ void P(int semSetId, int firstSem, int secondSem) {
 }
 
 void V(int semSetId, int firstSem, int secondSem) {
-    int semAction = 1;
     struct sembuf semaphore;
+    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
+    semaphore.sem_op = 1; // Unblock
 
     //First Sem
     semaphore.sem_num = firstSem;
-    semaphore.sem_op = semAction; // Block
-    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
+
     if (semop(semSetId, &semaphore, 1)) { // 1 size of array
         perror("Error in semop P()");
         exit(1);
@@ -72,24 +70,26 @@ void V(int semSetId, int firstSem, int secondSem) {
 
     //Second Sem
     semaphore.sem_num = secondSem;
-    semaphore.sem_op = semAction; // Block
-    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
     if (semop(semSetId, &semaphore, 1)) { // 1 size of array
         perror("Error in semop P()");
         exit(1);
     }
 }
 
-void think(int philosopher) {
-    printf("Philosopher %d started thinking\n", philosopher);
-    sleep(rand() % 10 + 1);
-    printf("Philosopher %d finished thinking\n", philosopher);
+void printFormatted (int philosopher, int firstFork, int secondFork, char *p_text){
+    printf("[Philosopher-%d] (%d, %d) %s\n", philosopher, firstFork, secondFork, p_text);
 }
 
-void eat(int philosopher) {
-    printf("Philosopher %d started eating\n", philosopher);
+void think(int philosopher, int firstFork, int secondFork) {
+    printFormatted(philosopher, firstFork, secondFork, "started thinking...");
     sleep(rand() % 10 + 1);
-    printf("Philosopher %d finished eating\n", philosopher);
+    printFormatted(philosopher, firstFork, secondFork, "stopped thinking...");
+}
+
+void eat(int philosopher, int firstFork, int secondFork) {
+    printFormatted(philosopher, firstFork, secondFork, "started eating...");
+    sleep(rand() % 10 + 1);
+    printFormatted(philosopher, firstFork, secondFork, "stopped eating...");
 }
 
 int main() {
@@ -104,16 +104,17 @@ int main() {
                 /*child*/
                 printf("Child process %d (%d) started\n", i, getpid());
                 srand(getpid());
-                for (int j = 0; j < 10; j++) {
-                    // Thinking
-                    think(i);
-                    // Eating
+                for (int j = 0; j < 5; j++) {
                     int firstFork = i;
                     int secondFork = (i + 1) % 5;
+                    // Thinking
+                    think(i, firstFork, secondFork);
+                    // Eating
                     P(semSetId, firstFork, secondFork);
-                    eat(i);
+                    eat(i, firstFork, secondFork);
                     V(semSetId, firstFork, secondFork);
                 }
+                printf("Philosoph %d died\n", i);
                 exit(0);
             default:
                 /*father*/
