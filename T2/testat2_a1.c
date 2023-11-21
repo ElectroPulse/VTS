@@ -8,7 +8,7 @@
 
 int createKey(char *p_path) {
     int key;
-    if ((key = ftok(p_path, '3')) < 0) {
+    if ((key = ftok(p_path, '2')) < 0) {
         perror("Error in ftok");
         exit(1);
     }
