@@ -23,15 +23,15 @@ int initSem(int sem_count, char proj_id) {
     }
 
     // Set Init
-    if(semctl(semSetId, WRITER_ID, SETVAL, 1)<0){
+    if (semctl(semSetId, WRITER_ID, SETVAL, 1) < 0) {
         perror("Error in semctl");
         exit(1);
     }
-    if(semctl(semSetId, READER_ID, SETVAL, 0)<0){
+    if (semctl(semSetId, READER_ID, SETVAL, 0) < 0) {
         perror("Error in semctl");
         exit(1);
     }
-    if(semctl(semSetId, MUTEX_ID, SETVAL, 1)<0){
+    if (semctl(semSetId, MUTEX_ID, SETVAL, 1) < 0) {
         perror("Error in semctl");
         exit(1);
     }
@@ -61,47 +61,47 @@ void V(int sem_num, int sem_id) {
     }
 }
 
-void writeProcess(int semSetId, int id){
+void writeProcess(int semSetId, int id) {
     for (int i = 0; i < 3; ++i) {
         P(WRITER_ID, semSetId);
         printf("[Writer-%d] Schreibe Variable begonnen\n", id);
-        sleep((rand()%5)+1);
+        sleep((rand() % 5) + 1);
         printf("[Writer-%d] Schreibe Variable beendet\n", id);
         V(WRITER_ID, semSetId);
         sleep(1);
-        // printf("[Writer-%d] Unkritischer Bereich begonnen\n", id);
-        sleep((rand()%5)+1);
-        // printf("[Writer-%d] Unkritischer Bereich beendet\n", id);
+        printf("[Writer-%d] Unkritischer Bereich begonnen\n", id);
+        sleep((rand() % 5) + 1);
+        printf("[Writer-%d] Unkritischer Bereich beendet\n", id);
         sleep(1);
     }
 }
 
-void readProcess(int semSetId, int id){
+void readProcess(int semSetId, int id) {
     for (int i = 0; i < 3; ++i) {
         P(MUTEX_ID, semSetId);
         V(READER_ID, semSetId);
-        if(semctl(semSetId, READER_ID, GETVAL) == 1){
+        if (semctl(semSetId, READER_ID, GETVAL) == 1) {
             P(WRITER_ID, semSetId);
         }
         V(MUTEX_ID, semSetId);
 
         printf("[Reader-%d] Lese Variable begonnen\n", id);
-        sleep((rand()%5)+1);
+        sleep((rand() % 5) + 1);
         printf("[Reader-%d] Lese Variable beendet\n", id);
 
 
         P(MUTEX_ID, semSetId);
         P(READER_ID, semSetId);
-        if(semctl(semSetId, READER_ID, GETVAL) == 0){
+        if (semctl(semSetId, READER_ID, GETVAL) == 0) {
             V(WRITER_ID, semSetId);
         }
         V(MUTEX_ID, semSetId);
 
         sleep(1);
 
-        // printf("[Reader-%d] Unkritischer Bereich begonnen\n", id);
-        sleep((rand()%5)+1);
-        // printf("[Reader-%d] Unkritischer Bereich beendet\n", id);
+        printf("[Reader-%d] Unkritischer Bereich begonnen\n", id);
+        sleep((rand() % 5) + 1);
+        printf("[Reader-%d] Unkritischer Bereich beendet\n", id);
         sleep(1);
     }
 }
@@ -123,7 +123,7 @@ int main() {
                 exit(1);
             case 0:
                 srand(getpid());
-                sleep((rand()%5)+1);
+                sleep((rand() % 5) + 1);
                 if (i < 5) {
                     writeProcess(semSetId, i);
                 } else {
@@ -131,11 +131,10 @@ int main() {
                 }
                 printf("Child %d ended\n", i);
                 exit(0);
-            default:
-                ;
+            default:;
         }
     }
-    for(int i = 0; i < 7; i++){
+    for (int i = 0; i < 7; i++) {
         wait(NULL);
     }
     return 0;
