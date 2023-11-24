@@ -5,6 +5,8 @@
 #include <sys/wait.h>
 
 int currentReaders = 0;
+int writer = 0;
+int mutex = 1;
 
 int initSem(int sem_count, char proj_id) {
     int semKey;
@@ -20,25 +22,15 @@ int initSem(int sem_count, char proj_id) {
         exit(1);
     }
 
-    // Set Init sem-value to 1
-    for (int i = 0; i < sem_count; i++) {
-        if (semctl(semSetId, i, SETVAL, 1) < 0) {
+    // Set Init
+    for (int i = 0; i < sem_count; ++i) {
+        if(semctl(semSetId, i, SETVAL, 1) < 0 ) {
             perror("Error in semctl");
             exit(1);
         }
     }
-    return semSetId;
-}
 
-void V(int sem_num, int sem_id) {
-    struct sembuf semaphore;
-    semaphore.sem_num = sem_num;
-    semaphore.sem_op = 1; // Unblock
-    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
-    if (semop(sem_id, &semaphore, 1)) { // 1 ist Groesse Array
-        perror("Error in semop V()");
-        exit(1);
-    }
+    return semSetId;
 }
 
 void P(int sem_num, int sem_id) {
@@ -52,45 +44,66 @@ void P(int sem_num, int sem_id) {
     }
 }
 
-void writeProcess(int writer){
-    for (int i = 0; i < 3; ++i) {
-        P(writer, 0);
-
-        printf("(%d) Schreibe Variable\n", getpid());
-        sleep(1);
-        printf("(%d) Unkritischer Bereich\n", getpid());
-        sleep(1);
-
-        V(writer, 0);
+void V(int sem_num, int sem_id) {
+    struct sembuf semaphore;
+    semaphore.sem_num = sem_num;
+    semaphore.sem_op = 1; // Unblock
+    semaphore.sem_flg = ~(IPC_NOWAIT | SEM_UNDO);
+    if (semop(sem_id, &semaphore, 1)) { // 1 ist Groesse Array
+        perror("Error in semop V()");
+        exit(1);
     }
 }
 
-void readProcess(int mutex, int writer){
+void writeProcess(int semSetId, int id){
     for (int i = 0; i < 3; ++i) {
-        P(mutex, 0);
+        P(writer, semSetId);
+        printf("[Writer-%d] Schreibe Variable begonnen\n", id);
+        sleep(1);
+        printf("[Writer-%d] Schreibe Variable beendet\n", id);
+        V(writer, semSetId);
+
+        // printf("[Writer-%d] Unkritischer Bereich begonnen\n", id);
+        sleep(1);
+        // printf("[Writer-%d] Unkritischer Bereich beendet\n", id);
+    }
+}
+
+void readProcess(int semSetId, int id){
+    for (int i = 0; i < 3; ++i) {
+        P(mutex, semSetId);
         currentReaders++;
         if(currentReaders == 1){
-            P(writer, 0);
+            P(writer, semSetId);
         }
-        V(mutex, 0);
+        V(mutex, semSetId);
 
-        printf("(%d) Lese Variable\n", getpid());
+        printf("[Reader-%d] Lese Variable begonnen\n", id);
         sleep(1);
-        printf("(%d) Unkritischer Bereich\n", getpid());
-        sleep(1);
+        printf("[Reader-%d] Lese Variable beendet\n", id);
 
-        P(mutex, 0);
+
+        P(mutex, semSetId);
         currentReaders--;
         if(currentReaders == 0){
-            V(writer, 0);
+            V(writer, semSetId);
         }
-        V(mutex, 0);
+        V(mutex, semSetId);
+
+        // printf("[Reader-%d] Unkritischer Bereich begonnen\n", id);
+        sleep(1);
+        // printf("[Reader-%d] Unkritischer Bereich beendet\n", id);
     }
 }
 
 int main() {
-    int writer = initSem(1, 1);
-    int mutex = initSem(1, 2);
+    int semSetId = initSem(2, 3);
+
+    /*
+        Semaphoren
+        [0] : Writer
+        [1] : Mutex
+    */
 
     for (int i = 0; i < 7; ++i) {
         switch (fork()) {
@@ -99,17 +112,14 @@ int main() {
                 exit(1);
             case 0:
                 if (i < 5) {
-                    writeProcess(writer);
+                    writeProcess(semSetId, i);
                 } else {
-                    readProcess(mutex, writer);
+                    readProcess(semSetId, i);
                 }
                 exit(0);
             default:
                 ;
         }
-    }
-    for(int i = 0; i < 7; i++){
-        wait(NULL);
     }
     return 0;
 }
