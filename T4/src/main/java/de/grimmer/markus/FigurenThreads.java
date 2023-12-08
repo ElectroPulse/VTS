@@ -2,8 +2,7 @@ package de.grimmer.markus;
 
 public class FigurenThreads
 {
-	public void startThreads()
-	{
+	public void startThreads() throws InterruptedException {
 		Figur f = new MyFigur();
 		Schreiber s = new Schreiber(f);
 		Leser l = new Leser(f);
@@ -13,5 +12,8 @@ public class FigurenThreads
 
 		s.start();
 		l.start();
+
+		l.join();
+		System.exit(0);
 	}
 }

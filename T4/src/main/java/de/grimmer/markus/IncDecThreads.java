@@ -57,7 +57,7 @@ public class IncDecThreads extends Thread
 	}
 
 	// Einfach rauf oder runter zählen...
-	public void demoSync()
+	public static void demoSync(long increment)
 	{
 		for (long i = 0; i < 100; i++)
 		{
@@ -67,7 +67,7 @@ public class IncDecThreads extends Thread
 			}
 			try
 			{
-				sleep((int)(25 * Math.random()));
+				sleep((int)(1000 * Math.random()));
 			}
 			catch (Exception e)
 			{
@@ -79,6 +79,6 @@ public class IncDecThreads extends Thread
 	public void run()
 	{
 		// demoUnSync(); // Unsynchronisiertes Zählen
-		demoSync (); // Synchronisiertes Zählen
+		demoSync(increment) ; // Synchronisiertes Zählen
 	}
 }
