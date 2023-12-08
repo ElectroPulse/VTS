@@ -21,15 +21,22 @@ public class UniqueId
 
 	public int getNext() throws IOException
 	{
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
-		int oldId = in.readInt();
-		in.close();
+		int oldId;
+		int newId;
+		synchronized (file)
+		{
+			DataInputStream in = new DataInputStream(new FileInputStream(file));
+			oldId = in.readInt(); // read and save old id
+			in.close(); // close file
+		}
 
-		DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
-		int newId = ++oldId;
-		out.writeInt(newId);
-		out.close();
-
+		synchronized (file)
+		{
+			DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
+			newId = ++oldId; // increment id
+			out.writeInt(newId); // write new id
+			out.close(); // close file
+		}
 		return newId;
 	}
 }

@@ -16,6 +16,7 @@ public class Schreiber extends Thread
 			char x = (char)('A' + z); // A .. H
 			int y = 1 + z; // 1 .. 8
 			f.setPosition(x, y);
+			System.out.print(".");
 		}
 	}
 }

@@ -12,9 +12,7 @@ public class Leser extends Thread
 	{
 		for (int i = 1; i <= 30; i++)
 		{
-			System.out.print(f.getPosition() + " ");
-			if (i % 10 == 0)
-				System.out.println();
+			System.out.print("\n" + f.getPosition() + " ");
 		}
 	}
 }
