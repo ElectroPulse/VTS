@@ -1,12 +1,12 @@
 // File  : IncDecThreads.java
 // Date  : 9.8.2005 23:15:35
 
-// Diese Klasse definiert einen Z�hler,
-// der von einem Thread um die Gr��e increment
+// Diese Klasse definiert einen Zähler,
+// der von einem Thread um die Größe increment
 // weitergeschaltet wird.
 // In der Anwendung wird als increment nur +1 bzw. -1 benutzt.
 // Das Programm entstand in Kooperation mit
-// Herrn Dipl. Inf. (FH) Martin Opel
+// Herrn Dipl.-Inf. (FH) Martin Opel
 
 // Ab JDK 1.5
 
@@ -14,11 +14,11 @@ package de.grimmer.markus;
 
 public class IncDecThreads extends Thread
 {
-	// Maximim für die Iteration
+	// Maximum für die Iteration
 	public static final long MAX = 10000000;
-	// Dies ist der Z�hler, der von diversen Threads
+	// Dies ist der Zähler, der von diversen Threads
 	// bearbeitet wird.
-	static long zaehler = 0;
+	static Long zaehler = 0L;
 	// Um die folgende Größe weiterschalten
 	private long increment = 0;
 
@@ -57,14 +57,17 @@ public class IncDecThreads extends Thread
 	}
 
 	// Einfach rauf oder runter zählen...
-	public void demo()
+	public void demoSync()
 	{
 		for (long i = 0; i < 100; i++)
 		{
-			zaehler = zaehler + increment;
+			synchronized (zaehler)
+			{
+				zaehler = zaehler + increment;
+			}
 			try
 			{
-				sleep((int)(1000 * Math.random()));
+				sleep((int)(25 * Math.random()));
 			}
 			catch (Exception e)
 			{
@@ -75,7 +78,7 @@ public class IncDecThreads extends Thread
 
 	public void run()
 	{
-		demoUnSync(); // Unsynchronisiertes Zählen
-		// demoSync (); // Synchronisiertes Zählen
+		// demoUnSync(); // Unsynchronisiertes Zählen
+		demoSync (); // Synchronisiertes Zählen
 	}
 }

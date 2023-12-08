@@ -23,6 +23,6 @@ public class MyFigur extends Figur
 			System.err.println("Failed to sleep!");
 			throw new RuntimeException(e);
 		}
-		return "x: " + x + " y: " + y;
+		return "" + x + y;
 	}
 }
