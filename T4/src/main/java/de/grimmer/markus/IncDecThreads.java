@@ -59,15 +59,15 @@ public class IncDecThreads extends Thread
 	// Einfach rauf oder runter zählen...
 	public static void demoSync(long increment)
 	{
-		for (long i = 0; i < 100; i++)
+		for (long i = 0; i < MAX; i++)
 		{
-			synchronized (zaehler)
+			synchronized (IncDecThreads.class)
 			{
 				zaehler = zaehler + increment;
 			}
 			try
 			{
-				sleep((int)(1000 * Math.random()));
+				// sleep((int)(100 * Math.random()));
 			}
 			catch (Exception e)
 			{
